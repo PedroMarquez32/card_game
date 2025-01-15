@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Seleccionar Carta{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Selecciona tu Carta</h1>
+
+    <form method="post">
+        <div class="row">
+            {% for card in cards %}
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ card.getNumber() }} de {{ card.getSuit() }}</h5>
+                            <button type="submit" name="card" value="{{ card.getId() }}" class="btn btn-primary">
+                                Seleccionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </form>
+
+    <div class="mt-3">
+        <a href="{{ path('game_show', {'id': game.id}) }}" class="btn btn-secondary">Volver al Juego</a>
+    </div>
+</div>
+{% endblock %} 

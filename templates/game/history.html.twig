@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historial de Partidas{% endblock %}
+
+{% block body %}
+    <h1>Historial de Partidas</h1>
+
+    <div class="table-responsive mt-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Jugador 1</th>
+                    <th>Jugador 2</th>
+                    <th>Resultado</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                    <tr>
+                        <td>{{ game.id }}</td>
+                        <td>{{ game.player1.username }}</td>
+                        <td>{{ game.player2.username }}</td>
+                        <td>
+                            {% if game.winner %}
+                                {% if game.winner.id == app.user.id %}
+                                    <span class="text-success">Victoria</span>
+                                {% else %}
+                                    <span class="text-danger">Derrota</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-warning">Empate</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ game.createdAt|date('Y-m-d H:i:s') }}</td>
+                        <td>
+                            <a href="{{ path('game_show', {'id': game.id}) }}" class="btn btn-sm btn-info">Ver</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %} 

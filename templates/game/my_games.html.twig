@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mis Partidas{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Historial de Partidas</h1>
+
+    {% if stats.total > 0 %}
+        {# Sección de Estadísticas #}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Estadísticas</h5>
+                        <div class="row text-center">
+                            <div class="col">
+                                <h3>{{ stats.total }}</h3>
+                                <p>Total Partidas</p>
+                            </div>
+                            <div class="col">
+                                <h3 class="text-success">{{ stats.wins }}</h3>
+                                <p>Victorias</p>
+                            </div>
+                            <div class="col">
+                                <h3 class="text-danger">{{ stats.losses }}</h3>
+                                <p>Derrotas</p>
+                            </div>
+                            <div class="col">
+                                <h3 class="text-warning">{{ stats.draws }}</h3>
+                                <p>Empates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Lista de Partidas #}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Partida #</th>
+                        <th>Oponente</th>
+                        <th>Mi Carta</th>
+                        <th>Carta Oponente</th>
+                        <th>Resultado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                        <tr>
+                            <td>{{ game.id }}</td>
+                            <td>
+                                {% if app.user == game.player1 %}
+                                    {{ game.player2 ? game.player2.username : 'Esperando oponente' }}
+                                {% else %}
+                                    {{ game.player1.username }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if app.user == game.player1 %}
+                                    {{ game.player1Card ? game.player1Card.number ~ ' de ' ~ game.player1Card.suit : '-' }}
+                                {% else %}
+                                    {{ game.player2Card ? game.player2Card.number ~ ' de ' ~ game.player2Card.suit : '-' }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if game.status == 'finished' %}
+                                    {% if app.user == game.player1 %}
+                                        {{ game.player2Card ? game.player2Card.number ~ ' de ' ~ game.player2Card.suit : '-' }}
+                                    {% else %}
+                                        {{ game.player1Card ? game.player1Card.number ~ ' de ' ~ game.player1Card.suit : '-' }}
+                                    {% endif %}
+                                {% else %}
+                                    Oculta
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if game.status == 'finished' %}
+                                    {% if not game.winner %}
+                                        <span class="badge bg-warning">Empate</span>
+                                    {% elseif game.winner == app.user %}
+                                        <span class="badge bg-success">Victoria</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Derrota</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-info">En curso</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('game_show', {'id': game.id}) }}" class="btn btn-sm btn-info">Ver Detalles</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No has jugado ninguna partida todavía.
+            <a href="{{ path('game_new') }}" class="btn btn-primary ms-3">Crear Nueva Partida</a>
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ path('game_new') }}" class="btn btn-primary">Crear Nueva Partida</a>
+        <a href="{{ path('game_index') }}" class="btn btn-secondary">Volver al Listado</a>
+    </div>
+</div>
+{% endblock %} 

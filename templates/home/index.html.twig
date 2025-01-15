@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bienvenido al Juego de Cartas{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="jumbotron">
+        <h1 class="display-4">¡Bienvenido al Juego de Cartas!</h1>
+        <p class="lead">Un juego simple donde dos jugadores compiten con cartas.</p>
+        <hr class="my-4">
+        {% if app.user %}
+            <p>¿Qué te gustaría hacer?</p>
+            <div class="btn-group">
+                <a href="{{ path('game_new') }}" class="btn btn-primary">Crear Nueva Partida</a>
+                <a href="{{ path('game_index') }}" class="btn btn   -info">Ver Partidas Disponibles</a>
+                <a href="{{ path('game_my_games') }}" class="btn btn-success">Mis Partidas</a>
+            </div>
+        {% else %}
+            <p>Para empezar a jugar, por favor inicia sesión o regístrate.</p>
+            <div class="btn-group">
+                <a href="{{ path('app_login') }}" class="btn btn-primary">Iniciar Sesión</a>
+                <a href="{{ path('app_register') }}" class="btn btn-success">Registrarse</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

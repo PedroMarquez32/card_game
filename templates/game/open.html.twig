@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partidas Abiertas{% endblock %}
+
+{% block body %}
+    <h1>Partidas Abiertas</h1>
+
+    <div class="row mt-4">
+        {% if games|length > 0 %}
+            {% for game in games %}
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Partida #{{ game.id }}</h5>
+                            <p>Creada por: {{ game.player1.username }}</p>
+                            <a href="{{ path('game_join', {'id': game.id}) }}" class="btn btn-primary">
+                                Unirse
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col">
+                <p>No hay partidas abiertas en este momento.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %} 
