@@ -6,32 +6,88 @@
 <div class="container mt-4">
     <h1>Lista de Juegos</h1>
 
-    <div class="mb-3">
-        <a href="{{ path('game_new') }}" class="btn btn-primary">Crear Nuevo Juego</a>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" 
+                       placeholder="Buscar por ID o nombre de jugador" 
+                       value="{{ searchQuery }}">
+                <button type="submit" class="btn btn-outline-primary">Buscar</button>
+                {% if searchQuery %}
+                    <a href="{{ path('game_index') }}" class="btn btn-outline-secondary ms-2">Limpiar</a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('game_new') }}" class="btn btn-primary">Crear Nuevo Juego</a>
+        </div>
     </div>
+
+    {% if searchQuery and games|length == 0 %}
+        <div class="alert alert-info">
+            No se encontraron partidas que coincidan con "{{ searchQuery }}"
+        </div>
+    {% endif %}
 
     <div class="row">
         {% for game in games %}
-            <div class="col-md-6 mb-3">
+            <div class="col-md-6 mb-4">
                 <div class="card">
+                    <div class="card-header">
+                        Juego #{{ game.id }}
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Juego #{{ game.id }}</h5>
-                        <p class="card-text">
-                            Estado: {{ game.status }}<br>
-                            Jugador 1: {{ game.player1.username }}<br>
+                        <p>Estado: 
+                            {% if game.status == 'waiting' %}
+                                <span class="badge bg-warning">Esperando jugador</span>
+                            {% elseif game.status == 'open' %}
+                                <span class="badge bg-info">En curso</span>
+                            {% elseif game.status == 'finished' and game.winner %}
+                                <span class="badge bg-success">Finalizada</span>
+                            {% elseif game.status == 'finished' and not game.winner and (game.player1Card or game.player2Card) %}
+                                <span class="badge bg-secondary">Empate</span>
+                            {% else %}
+                                <span class="badge bg-purple" style="background-color: purple;">Cerrada</span>
+                            {% endif %}
+                        </p>
+                        <p>Jugador 1: {{ game.player1.username }}</p>
+                        <p>
                             {% if game.player2 %}
                                 Jugador 2: {{ game.player2.username }}
                             {% else %}
                                 Esperando jugador 2
                             {% endif %}
                         </p>
-                        <a href="{{ path('game_show', {'id': game.id}) }}" class="btn btn-info">Ver Detalles</a>
+
+                        <div class="btn-group">
+                            <a href="{{ path('game_show', {'id': game.id}) }}" class="btn btn-info">Ver Detalles</a>
+                            
+                            {% if app.user == game.player1 and game.status != 'finished' or is_granted('ROLE_ADMIN') %}
+                                <form method="post" action="{{ path('game_close', {'id': game.id}) }}" style="display: inline-block" onsubmit="return confirm('¿Estás seguro de que quieres cerrar esta partida?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('close' ~ game.id) }}">
+                                    <button type="submit" class="btn btn-warning">Cerrar Partida</button>
+                                </form>
+                            {% endif %}
+
+                            {% if app.user == game.player1 or is_granted('ROLE_ADMIN') %}
+                                <form method="post" action="{{ path('game_delete', {'id': game.id}) }}" style="display: inline-block" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta partida?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ game.id) }}">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         {% else %}
             <div class="col-12">
-                <p>No hay juegos disponibles.</p>
+                <p class="text-center">No hay partidas disponibles</p>
             </div>
         {% endfor %}
     </div>

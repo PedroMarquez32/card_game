@@ -9,14 +9,14 @@
         {% endblock %}
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{{ path('app_home') }}">Card Game</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <a class="navbar-brand" href="{{ path('game_index') }}">Card Game</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav me-auto">
                         {% if app.user %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ path('game_new') }}">Nueva Partida</a>
@@ -27,6 +27,15 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ path('game_my_games') }}">Mis Partidas</a>
                             </li>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('admin_users_index') }}">Gestionar Usuarios</a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    </ul>
+                    <ul class="navbar-nav">
+                        {% if app.user %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ path('app_logout') }}">Cerrar Sesión</a>
                             </li>
@@ -61,3 +70,4 @@
         {% endblock %}
     </body>
 </html>
+

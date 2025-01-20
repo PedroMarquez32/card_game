@@ -23,11 +23,11 @@ class Game
     private ?User $player2 = null;
 
     #[ORM\ManyToOne(targetEntity: Card::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: "player1_card_id", nullable: true)]
     private ?Card $player1Card = null;
 
     #[ORM\ManyToOne(targetEntity: Card::class)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(name: "player2_card_id", nullable: true)]
     private ?Card $player2Card = null;
 
     #[ORM\Column(length: 20)]
@@ -36,6 +36,11 @@ class Game
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $winner = null;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $availableCards = [];
 
     public function getId(): ?int
     {
@@ -106,5 +111,16 @@ class Game
     {
         $this->winner = $winner;
         return $this;
+    }
+
+    public function setAvailableCards(array $numbers): self
+    {
+        $this->availableCards = $numbers;
+        return $this;
+    }
+
+    public function getAvailableCards(): array
+    {
+        return $this->availableCards ?? [];
     }
 } 

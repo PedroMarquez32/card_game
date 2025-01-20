@@ -11,10 +11,24 @@
             <div class="card mb-3">
                 <div class="card-header">
                     Jugador 1: {{ game.player1.username }}
+                    {% if game.status == 'finished' and game.winner == game.player1 %}
+                        <span class="badge bg-success">¡Ganador!</span>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     {% if game.player1Card %}
-                        <h5 class="card-title">{{ game.player1Card.getNumber() }} de {{ game.player1Card.getSuit() }}</h5>
+                        {% if game.status == 'finished' or app.user == game.player1 %}
+                            <h5 class="card-title">
+                                {{ game.player1Card.getNumber() }} de 
+                                {% if game.player1Card.getSuit() == 'hearts' %}♥️ Corazones
+                                {% elseif game.player1Card.getSuit() == 'diamonds' %}♦️ Diamantes
+                                {% elseif game.player1Card.getSuit() == 'clubs' %}♣️ Tréboles
+                                {% elseif game.player1Card.getSuit() == 'spades' %}♠️ Picas
+                                {% endif %}
+                            </h5>
+                        {% else %}
+                            <p>Carta seleccionada (se revelará al final)</p>
+                        {% endif %}
                     {% else %}
                         <p>Aún no ha seleccionado carta</p>
                     {% endif %}
@@ -25,15 +39,25 @@
         <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-header">
-                    {% if game.player2 %}
-                        Jugador 2: {{ game.player2.username }}
-                    {% else %}
-                        Esperando jugador 2
+                    Jugador 2: {{ game.player2 ? game.player2.username : 'Esperando jugador' }}
+                    {% if game.status == 'finished' and game.winner == game.player2 %}
+                        <span class="badge bg-success">¡Ganador!</span>
                     {% endif %}
                 </div>
                 <div class="card-body">
                     {% if game.player2Card %}
-                        <h5 class="card-title">{{ game.player2Card.getNumber() }} de {{ game.player2Card.getSuit() }}</h5>
+                        {% if game.status == 'finished' or app.user == game.player2 %}
+                            <h5 class="card-title">
+                                {{ game.player2Card.getNumber() }} de 
+                                {% if game.player2Card.getSuit() == 'hearts' %}♥️ Corazones
+                                {% elseif game.player2Card.getSuit() == 'diamonds' %}♦️ Diamantes
+                                {% elseif game.player2Card.getSuit() == 'clubs' %}♣️ Tréboles
+                                {% elseif game.player2Card.getSuit() == 'spades' %}♠️ Picas
+                                {% endif %}
+                            </h5>
+                        {% else %}
+                            <p>Carta seleccionada (se revelará al final)</p>
+                        {% endif %}
                     {% else %}
                         <p>Aún no ha seleccionado carta</p>
                     {% endif %}
@@ -46,11 +70,27 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Estado del Juego: {{ game.status }}</h5>
-                    {% if game.winner %}
-                        <p class="card-text">Ganador: {{ game.winner.username }}</p>
-                    {% elseif game.status == 'finished' %}
-                        <p class="card-text">¡Empate!</p>
+                    <h5 class="card-title">Estado del Juego: 
+                        {% if game.status == 'waiting' %}
+                            <span class="badge bg-warning">Esperando jugador</span>
+                        {% elseif game.status == 'open' %}
+                            <span class="badge bg-info">En curso</span>
+                        {% elseif game.status == 'finished' and game.winner %}
+                            <span class="badge bg-success">Finalizada</span>
+                        {% elseif game.status == 'finished' and not game.winner and (game.player1Card or game.player2Card) %}
+                            <span class="badge bg-secondary">Empate</span>
+                        {% else %}
+                            <span class="badge bg-purple" style="background-color: purple;">Cerrada</span>
+                        {% endif %}
+                    </h5>
+                    {% if game.status == 'finished' %}
+                        {% if game.winner %}
+                            <p class="card-text">Ganador: {{ game.winner.username }}</p>
+                        {% elseif game.player1Card or game.player2Card %}
+                            <p class="card-text">¡Empate!</p>
+                        {% else %}
+                            <p class="card-text">Partida cerrada por el administrador</p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -65,9 +105,35 @@
         </div>
     {% endif %}
 
-    {% if game.status == 'open' and game.player2 and app.user == game.player2 and not game.player2Card %}
+    {% if (game.status in ['open', 'waiting'] and app.user == game.player1 and not game.player1Card) or 
+          (game.status == 'open' and app.user == game.player2 and not game.player2Card) %}
         <div class="mt-3">
-            <a href="{{ path('game_play', {'id': game.id}) }}" class="btn btn-primary">Seleccionar Carta</a>
+            <a href="{{ path('game_play', {'id': game.id}) }}" class="btn btn-primary">
+                {% if not game.player2 %}
+                    Seleccionar Primera Carta
+                {% else %}
+                    Seleccionar Carta
+                {% endif %}
+            </a>
+        </div>
+    {% endif %}
+
+    {% if game.status == 'finished' %}
+        <div class="alert {% if game.winner %}alert-success{% else %}alert-warning{% endif %} mt-3">
+            {% if game.winner %}
+                ¡{{ game.winner.username }} ha ganado la partida!
+            {% else %}
+                ¡Empate!
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if game.status == 'finished' and (app.user == game.player1 or app.user == game.player2) %}
+        <div class="mt-3 text-center">
+            <form method="post" action="{{ path('game_rematch', {'id': game.id}) }}" style="display: inline-block">
+                <input type="hidden" name="_token" value="{{ csrf_token('rematch' ~ game.id) }}">
+                <button type="submit" class="btn btn-primary">¡Revancha!</button>
+            </form>
         </div>
     {% endif %}
 

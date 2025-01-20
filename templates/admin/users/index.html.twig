@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Gestión de Usuarios</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Roles</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            {% for role in user.roles %}
+                                <span class="badge {% if role == 'ROLE_ADMIN' %}bg-danger{% else %}bg-primary{% endif %}">
+                                    {{ role }}
+                                </span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% if user != app.user %}
+                                <form method="post" action="{{ path('admin_users_toggle_role', {'id': user.id}) }}" style="display: inline-block">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle-role' ~ user.id) }}">
+                                    <input type="hidden" name="role" value="ROLE_ADMIN">
+                                    <button type="submit" class="btn btn-sm {% if 'ROLE_ADMIN' in user.roles %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                        {% if 'ROLE_ADMIN' in user.roles %}
+                                            Quitar Admin
+                                        {% else %}
+                                            Hacer Admin
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ path('game_index') }}" class="btn btn-secondary">Volver al Listado de Juegos</a>
+    </div>
+</div>
+{% endblock %} 
